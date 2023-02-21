@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const _ = require("lodash");
+require("dotenv").config();
 const date = require(__dirname + "/date.js");
 const app = express();
 
@@ -10,7 +11,8 @@ app.set('view engine', 'ejs');
 app.use(express.static("public"));
 
 
-mongoose.connect("mongodb://localhost:27017/todolistDB",{useNewUrlParser: true});
+// mongoose.connect("mongodb://127.0.0.1:27017/todolistDB",{useNewUrlParser: true});
+mongoose.connect(process.env.mongoUrl);
 
 const itemSchema = {
     name:String
@@ -55,7 +57,7 @@ app.get("/", function(req, res){
 
 app.get("/:customListName", function(req, res){
     const customListName = _.capitalize(req.params.customListName);
-
+    let day = date.getDate();
     List.findOne({name: customListName}, function(err, foundList){
         if(!err){
             if(!foundList){
@@ -68,7 +70,7 @@ app.get("/:customListName", function(req, res){
                 res.redirect("/"+customListName);
             }else{
                 //show an existing list
-                res.render("list", {listTitle: foundList.name, newListItems:foundList.items})
+                res.render("list", {listTitle: foundList.name, newListItems:foundList.items, day:day})
             }
         }
     }); 
